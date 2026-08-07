@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 <docker-network-name>"
+    exit 1
+fi
+
+network="$1"
+
+docker network inspect "$network" --format '{
+    "Name": "{{.Name}}",
+    "ID": "{{.ID}}",
+    "Created": "{{.Created}}",
+    "Scope": "{{.Scope}}",
+    "Driver": "{{.Driver}}",
+    "Internal": {{.Internal}},
+    "Containers": [
+        {{- $first := true -}}
+        {{- range $k, $v := .Containers -}}
+            {{- if not $first }}, {{ end -}}
+            "{{ $v.Name }} ({{ $v.IPv4Address }})"
+            {{- $first = false -}}
+        {{- end -}}
+    ],
+    "Networks": [
+        {{- $first := true -}}
+        {{- range $k, $v := .IPAM.Config -}}
+            {{- if not $first }}, {{ end -}}
+            "{{$v.Subnet}} gw={{$v.Gateway}}"
+            {{- $first = false -}}
+        {{- end -}}
+    ]
+}'

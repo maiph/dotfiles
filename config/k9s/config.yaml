@@ -1,0 +1,15 @@
+k9s:
+  # avoid quiting with ctrl-c, must use :quit command
+  noExitOnCtrlC: true
+  ui:
+    skin: catppuccin-mocha
+    # Set to true to hide K9s header. Default false
+    headless: false
+    # Set to true to hide K9s logo. Default false
+    logoless: true
+    # Toggles reactive UI. This option provide for watching on disk artifacts changes and update the UI live  Defaults to false.
+    reactive: false
+    # Toggles icons display as not all terminal support these chars. Default: true
+    noIcons: true
+  # logger:
+  #   fullScreen: true

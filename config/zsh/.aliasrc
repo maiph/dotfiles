@@ -1,0 +1,14 @@
+alias ls="ls -LFGh"
+alias ll="ls -LFGhl"
+alias la="ls -LFGha"
+alias lla="ls -LFGhal"
+
+alias cls="clear"
+
+alias k="kubecolor"
+alias kubectl="kubecolor"
+alias kctx="kubectx"
+alias mk="minikube"
+alias vim="nvim"
+
+alias cc="claude agents"

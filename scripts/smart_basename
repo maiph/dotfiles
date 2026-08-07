@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -e
+
+last_two_segments() {
+    local p="$1"
+    local last="${p##*/}"
+    local rest="${p%/*}"
+
+    if [[ "$rest" == "$p" ]]; then
+        echo "$last"
+    else
+        local second="${rest##*/}"
+        echo "$second/$last"
+    fi
+}
+
+path=""
+if [ -z "$1" ]; then
+    path="$PWD"
+else
+    path="$1"
+fi
+
+
+IFS=':' read -ra _cdpaths <<< "$CDPATH"
+_cdpaths=($(printf '%s\n' "${_cdpaths[@]}" | awk '{ print length, $0 }' | sort -rn | cut -d' ' -f2-))
+for prefix in "${_cdpaths[@]}"; do
+    if [[ -n "$prefix" && "$path" == "$prefix"* ]]; then
+        result=$(echo "${path#$prefix}" | sed 's|^/||')
+        if [[ -n "$result" ]]; then
+            last_two_segments "$result"
+            exit 0
+        fi
+    fi
+done
+
+echo "No CDPATH match for $path" >&2
+
+# Fall back to basename
+last_two_segments "$path"

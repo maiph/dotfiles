@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "config/ghostty/config": "toml",
+        "config/scripts/*": "shellscript",
+        "config/zsh/.aliasrc": "shellscript"
+    },
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/derailed/k9s/master/internal/config/json/schemas/k9s.json": "config/k9s/config.yaml"
+    }
+}

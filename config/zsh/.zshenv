@@ -1,13 +1,23 @@
 # .zshenv gets sourced on all invocations of zsh
 # even non-interactive ones (ie. scripts)
-# Load Homebrew only if available (macOS / linuxbrew)
-if [ -x /opt/homebrew/bin/brew ]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-    export HOMEBREW_PREFIX="$(brew --prefix)"
-elif command -v brew >/dev/null 2>&1; then
+# Load Homebrew only if available (macOS ARM / Intel, or Linuxbrew)
+for _brew in \
+    /opt/homebrew/bin/brew \
+    /usr/local/bin/brew \
+    /home/linuxbrew/.linuxbrew/bin/brew \
+    "$HOME/.linuxbrew/bin/brew"; do
+    if [ -x "$_brew" ]; then
+        eval "$($_brew shellenv)"
+        export HOMEBREW_PREFIX="$(brew --prefix)"
+        break
+    fi
+done
+# Fall back to any brew already on PATH (e.g. user-managed install)
+if [ -z "${HOMEBREW_PREFIX:-}" ] && command -v brew >/dev/null 2>&1; then
     eval "$(brew shellenv)"
     export HOMEBREW_PREFIX="$(brew --prefix)"
 fi
+unset _brew
 
 
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}" && mkdir -p "$XDG_CONFIG_HOME"
@@ -38,7 +48,25 @@ setopt HIST_NO_STORE
 setopt HIST_REDUCE_BLANKS
 
 
-export LANG="en_US.UTF-8"
+export EDITOR="nvim"
+# Locale: pick a locale the system actually supports (macOS ships UTF-8
+# locales, but Linux only has generated ones, e.g. en_US.utf8 or C.utf8).
+_set_locale() {
+    for loc in "en_US.UTF-8" "en_US.utf8" "C.UTF-8" "C.utf8"; do
+        if locale -a 2>/dev/null | grep -qi "^${loc}$"; then
+            export LANG="$loc"; return 0
+        fi
+    done
+    # fall back to any UTF-8 locale still present
+    if loc=$(locale -a 2>/dev/null | grep -i 'utf' | head -n1); then
+        [ -n "$loc" ] && export LANG="$loc"; return 0
+    fi
+    return 1
+}
+if [ -z "$LANG" ] || ! locale -a 2>/dev/null | grep -qi "^${LANG}$"; then
+    _set_locale
+fi
+unset -f _set_locale
 # sdkman_auto_complete="false"
 export ZSH_DISABLE_COMPFIX="true"
 

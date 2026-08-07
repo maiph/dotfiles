@@ -7,7 +7,7 @@ if ! command -v istioctl &>/dev/null; then
 fi
 
 if ! command -v kubectl &>/dev/null; then
-    brew install --cask kubectl
+    brew install kubectl
 fi
 
 if ! command -v helm &>/dev/null; then

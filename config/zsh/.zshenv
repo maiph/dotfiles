@@ -1,6 +1,13 @@
 # .zshenv gets sourced on all invocations of zsh
 # even non-interactive ones (ie. scripts)
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# Load Homebrew only if available (macOS / linuxbrew)
+if [ -x /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+    export HOMEBREW_PREFIX="$(brew --prefix)"
+elif command -v brew >/dev/null 2>&1; then
+    eval "$(brew shellenv)"
+    export HOMEBREW_PREFIX="$(brew --prefix)"
+fi
 
 
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}" && mkdir -p "$XDG_CONFIG_HOME"
@@ -32,7 +39,14 @@ setopt HIST_REDUCE_BLANKS
 
 
 export LANG="en_US.UTF-8"
-export SDKMAN_DIR=$(brew --prefix sdkman-cli)/libexec
 # sdkman_auto_complete="false"
 export ZSH_DISABLE_COMPFIX="true"
-[[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" ]] && sdkman_auto_complete=false source "${SDKMAN_DIR}/bin/sdkman-init.sh"
+
+# SDKMAN (only when installed via Homebrew)
+if [ -n "${HOMEBREW_PREFIX:-}" ] && [ -d "${HOMEBREW_PREFIX}/opt/sdkman-cli/libexec" ]; then
+    export SDKMAN_DIR="${HOMEBREW_PREFIX}/opt/sdkman-cli/libexec"
+fi
+if [ -n "${SDKMAN_DIR:-}" ] && [ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" ]; then
+    sdkman_auto_complete=false
+    source "${SDKMAN_DIR}/bin/sdkman-init.sh"
+fi

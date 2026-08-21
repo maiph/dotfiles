@@ -3,7 +3,7 @@
 set -e
 
 if ! command -v sdk &>/dev/null; then
-    brew tap sdkman/tap
+    brew tap sdkman/tap && brew trust sdkman/tap
     brew install sdkman-cli
 fi
 

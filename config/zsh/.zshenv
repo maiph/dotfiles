@@ -30,6 +30,8 @@ export COMP_DIR="${XDG_DATA_HOME}/zsh/completions"
 export KUBECOLOR_OBJ_FRESH="24h"
 export KUBECOLOR_CONFIG="$XDG_CONFIG_HOME/kube/color.yaml"
 
+export LAVISH_AXI_HOST="0.0.0.0"
+
 # export ZSH_COMPDUMP="${XDG_CACHE_HOME}/zsh/.zcompdump"
 
 # --------------- ZSH Options ----------------
@@ -46,6 +48,15 @@ setopt HIST_IGNORE_SPACE
 setopt HIST_NO_FUNCTIONS
 setopt HIST_NO_STORE
 setopt HIST_REDUCE_BLANKS
+
+# History storage: keep it in XDG state, OUTSIDE the dotfiles git repo.
+# Previously HISTFILE/HISTSIZE/SAVEHIST were never set -> zsh saved nothing
+# (defaults: HISTSIZE=30, SAVEHIST=0) and the file would otherwise be
+# clobbered by `git pull` / `git restore` if left under $ZDOTDIR.
+export HISTFILE="${XDG_STATE_HOME}/zsh/.zsh_history"
+export HISTSIZE=100000
+export SAVEHIST=10000
+mkdir -p "${XDG_STATE_HOME}/zsh"
 
 
 export EDITOR="nvim"

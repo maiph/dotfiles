@@ -46,6 +46,12 @@ if [[ -r ${ZDOTDIR:-$HOME}/.aliasrc ]]; then
     . ${ZDOTDIR:-$HOME}/.aliasrc
 fi
 
+# Guarantee delete-previous-word regardless of layout/theme.
+# ESC+DEL (0x7f) and ESC+Ctrl-H are what terminals send for option+backspace.
+bindkey -e 2>/dev/null
+bindkey '^[^?' backward-kill-word
+bindkey '^[^H' backward-kill-word
+
 # export ZSH_COMPDUMP="${XDG_CACHE_HOME}/zsh/.zcompdump"
 autoload -Uz compinit
 compinit -d $XDG_CACHE_HOME/zsh/.zcompdump

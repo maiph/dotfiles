@@ -1,0 +1,25 @@
+[user]
+	name = "Ricardo Pinheiro"
+	email = "ricmpinheiro@gmail.com"
+
+[alias]
+	c = commit
+	l = log
+	ll = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	s = switch
+	st = status --branch --short
+
+[gpg]
+	format = ssh
+
+[merge]
+	autoStash = true
+
+[pull]
+	rebase = true
+
+[push]
+	default = current
+
+[rebase]
+	autoStash = true

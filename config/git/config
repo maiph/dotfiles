@@ -23,3 +23,6 @@
 
 [rebase]
 	autoStash = true
+
+[include]
+	path = ~/.gitconfig.local

@@ -35,3 +35,9 @@ keybind = super+z=unbind
 #keybind = option+backspace=csi:\x7f
 #keybind = option+delete=csi:\x7f
  
+# Force option+backspace to always emit ESC 0x7f (backward-kill-word).
+# Ghostty's own option-as-alt detection is layout-dependent and emits a plain
+# DEL (one-char delete) on some layouts, which breaks tmux/ssh word-deletion.
+# `esc:` sends ESC + the given byte unconditionally.
+keybind = option+backspace=esc:\x7f
+keybind = option+delete=esc:\x7f

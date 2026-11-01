@@ -31,3 +31,7 @@ keybind = super+d=unbind
 keybind = super+k=unbind
 keybind = super+w=unbind
 keybind = super+z=unbind
+
+#keybind = option+backspace=csi:\x7f
+#keybind = option+delete=csi:\x7f
+ 

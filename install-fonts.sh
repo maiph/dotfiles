@@ -2,6 +2,6 @@
 
 set -e
 
-if ! $(brew list --cask font-jetbrains-mono) &>/dev/null; then
+if ! brew list --cask font-jetbrains-mono &>/dev/null; then
     brew install --cask font-jetbrains-mono
 fi

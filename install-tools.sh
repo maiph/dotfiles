@@ -6,6 +6,6 @@ if ! command -v uvx &>/dev/null; then
     brew install uv
 fi
 
-if ! command -v yaak &>/dev/null; then
+if ! command -v claude &>/dev/null; then
     brew install --cask claude-code@latest
 fi

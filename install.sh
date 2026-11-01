@@ -2,6 +2,25 @@
 
 # ---------- Homebrew ----------
 
+find_homebrew() {
+    local candidate
+    if command -v brew; then
+        return 0
+    fi
+
+    for candidate in \
+        /opt/homebrew/bin/brew \
+        /usr/local/bin/brew \
+        /home/linuxbrew/.linuxbrew/bin/brew \
+        "$HOME/.linuxbrew/bin/brew"; do
+        if [ -x "$candidate" ]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
 # Install the system build tools Homebrew-on-Linux requires (armed for the
 # common Linux package managers; mirrors https://docs.brew.sh/Homebrew-on-Linux).
 install_linux_build_deps() {
@@ -23,7 +42,7 @@ install_linux_build_deps() {
 # installation fails, since nearly everything below depends on brew.
 ensure_homebrew() {
     local brew
-    if brew="$(command -v brew)"; then
+    if brew="$(find_homebrew)"; then
         echo "Homebrew already installed at ${brew}"
     else
         case "$(uname -s)" in
@@ -43,7 +62,7 @@ ensure_homebrew() {
         esac
     fi
 
-    if ! brew="$(command -v brew)"; then
+    if ! brew="$(find_homebrew)"; then
         echo "ERROR: Homebrew is required but could not be installed." >&2
         exit 1
     fi

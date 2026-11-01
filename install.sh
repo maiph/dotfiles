@@ -96,8 +96,18 @@ run_step "Environment setup" source ./config/zsh/.zshenv >/dev/null 2>&1 || {
     exit 1
 }
 
+# Usage: link_path <source> <target>
+# An existing correct symlink is left alone. Any other existing target (file,
+# directory, or symlink) is moved to <target>.backup.YYYY-MM-DD/original beside
+# the target, using the local date. If that backup already exists, append .1,
+# .2, etc. to the backup directory name to preserve earlier backups.
+# The backup path is printed and retained after a successful link;
+# repeated runs with the correct link do not create additional backups.
+# If linking fails, the backup is moved back and its empty directory removed.
+# To restore a retained backup manually, remove the installed symlink and move
+# the printed backup's original entry back to <target>.
 link_path() {
-    local source_path target="$2" backup=""
+    local source_path target="$2" backup="" backup_date backup_base suffix=0
     source_path="$(realpath "$1")" || return $?
 
     mkdir -p "$(dirname "$target")" || return $?
@@ -107,7 +117,14 @@ link_path() {
 
     # Preserve files, real directories, and conflicting (even dangling) links.
     if [ -e "$target" ] || [ -L "$target" ]; then
-        backup="$(mktemp -d "${target}.backup.XXXXXX")" || return $?
+        backup_date="$(date +%F)" || return $?
+        backup_base="${target}.backup.${backup_date}"
+        backup="$backup_base"
+        while [ -e "$backup" ] || [ -L "$backup" ]; do
+            suffix=$((suffix + 1))
+            backup="${backup_base}.${suffix}"
+        done
+        mkdir "$backup" || return $?
         if ! mv "$target" "$backup/original"; then
             rmdir "$backup"
             return 1

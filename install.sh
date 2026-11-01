@@ -2,23 +2,6 @@
 
 # ---------- Homebrew ----------
 
-# Locate an existing Homebrew installation across macOS and Linux prefixes.
-find_brew_prefix() {
-    local prefix
-    for prefix in \
-        /opt/homebrew \
-        /usr/local \
-        /home/linuxbrew/.linuxbrew \
-        "${HOME}/.linuxbrew" \
-        "${HOME}/homebrew"; do
-        if [ -x "${prefix}/bin/brew" ]; then
-            printf '%s\n' "${prefix}"
-            return 0
-        fi
-    done
-    return 1
-}
-
 # Install the system build tools Homebrew-on-Linux requires (armed for the
 # common Linux package managers; mirrors https://docs.brew.sh/Homebrew-on-Linux).
 install_linux_build_deps() {
@@ -39,27 +22,33 @@ install_linux_build_deps() {
 # Install Homebrew if not already present. Aborts the dotfiles setup if the
 # installation fails, since nearly everything below depends on brew.
 ensure_homebrew() {
-    local prefix
-    if prefix="$(find_brew_prefix)"; then
-        echo "Homebrew already installed at ${prefix}"
-    elif [ "$(uname -s)" = "Darwin" ]; then
-        echo "Installing Homebrew (macOS)..."
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    local brew
+    if brew="$(command -v brew)"; then
+        echo "Homebrew already installed at ${brew}"
     else
-        echo "Installing Homebrew (Linux)..."
-        install_linux_build_deps
-        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        case "$(uname -s)" in
+            Darwin)
+                echo "Installing Homebrew (macOS)..."
+                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+                ;;
+            Linux)
+                echo "Installing Homebrew (Linux)..."
+                install_linux_build_deps
+                NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+                ;;
+            *)
+                echo "ERROR: Unsupported operating system: $(uname -s)" >&2
+                exit 1
+                ;;
+        esac
     fi
 
-    if ! prefix="$(find_brew_prefix)"; then
+    if ! brew="$(command -v brew)"; then
         echo "ERROR: Homebrew is required but could not be installed." >&2
         exit 1
     fi
 
-    HOMEBREW_PREFIX="${prefix}"
-    export HOMEBREW_PREFIX
-    # Put brew on PATH for the remainder of this script.
-    eval "$("${prefix}/bin/brew" shellenv)"
+    eval "$("${brew}" shellenv)"
 }
 
 ensure_homebrew

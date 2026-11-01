@@ -96,6 +96,34 @@ run_step "Environment setup" source ./config/zsh/.zshenv >/dev/null 2>&1 || {
     exit 1
 }
 
+link_path() {
+    local source_path target="$2" backup=""
+    source_path="$(realpath "$1")" || return $?
+
+    mkdir -p "$(dirname "$target")" || return $?
+    if [ -L "$target" ] && [ "$(readlink "$target")" = "$source_path" ]; then
+        return 0
+    fi
+
+    # Preserve files, real directories, and conflicting (even dangling) links.
+    if [ -e "$target" ] || [ -L "$target" ]; then
+        backup="$(mktemp -d "${target}.backup.XXXXXX")" || return $?
+        if ! mv "$target" "$backup/original"; then
+            rmdir "$backup"
+            return 1
+        fi
+        printf 'Backed up %s to %s/original\n' "$target" "$backup"
+    fi
+
+    if ! ln -s "$source_path" "$target"; then
+        if [ -n "$backup" ]; then
+            mv "$backup/original" "$target" || return $?
+            rmdir "$backup" || return $?
+        fi
+        return 1
+    fi
+}
+
 install_scripts() {
     if [ ! -d ~/.local/bin ]; then
         mkdir -p ~/.local/bin || return $?
@@ -103,7 +131,7 @@ install_scripts() {
 
     for f in ./scripts/*; do
         echo "Installing script: $f"
-        ln -sfn "$(realpath "$f")" "$HOME/.local/bin/$(basename "$f")" || return $?
+        link_path "$f" "$HOME/.local/bin/$(basename "$f")" || return $?
     done
 }
 
@@ -138,8 +166,7 @@ for d in ./config/*/; do
         run_step "$pre_script" bash "$pre_script" || continue
     fi
 
-    # echo "Linking $d -> $target"
-    run_step "Linking $target" ln -sfn "$(realpath "$d")" "$target" || continue
+    run_step "Linking $target" link_path "$d" "$target" || continue
 
     # Run post-script if it exists
     if [ -f "$post_script" ]; then
